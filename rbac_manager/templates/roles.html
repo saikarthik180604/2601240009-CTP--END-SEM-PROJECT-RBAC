@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Roles{% endblock %}
+{% block heading %}Roles{% endblock %}
+{% block subtitle %}Roles belong to one tenant and can inherit from other roles in the same tenant.{% endblock %}
+{% block content %}
+<section class="panel">
+  <h3>All roles</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Tenant</th><th>Role</th><th>Inherits from</th><th>Direct permissions</th></tr></thead>
+    <tbody>
+    {% for r in roles %}
+      <tr>
+        <td>{{ r.role_id }}</td>
+        <td><span class="badge tenant">{{ tenant_names[r.tenant_id] }}</span></td>
+        <td><strong>{{ r.role_name }}</strong></td>
+        <td>{% for pid in r.parent_roles %}<span class="badge role">{{ role_map[pid].role_name }}</span> {% else %}<span class="muted">base role</span>{% endfor %}</td>
+        <td>{% for p in r.permissions %}<code class="perm">{{ p }}</code> {% else %}<span class="muted">none</span>{% endfor %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="empty">No roles yet. Create one below.</td></tr>
+    {% endfor %}
+    </tbody></table></div>
+</section>
+
+<section class="grid-2">
+  <article class="panel">
+    <h3>Create role</h3>
+    <form class="form" data-api="/api/roles">
+      <label>Role name<input name="role_name" placeholder="e.g. Auditor" required></label>
+      <label>Tenant
+        <select name="tenant_id" required>{% for t in tenants %}<option value="{{ t.tenant_id }}">{{ t.name }}</option>{% endfor %}</select></label>
+      <label>Direct permissions (hold Ctrl to select several)
+        <select name="permissions" multiple size="7">{% for p in permissions %}<option value="{{ p.name }}">{{ p.name }}</option>{% endfor %}</select></label>
+      <button class="btn btn-primary" type="submit">Create role</button>
+    </form>
+  </article>
+  <article class="panel">
+    <h3>Grant a permission to a role</h3>
+    <form class="form" data-api="/api/role-permissions">
+      <label>Role
+        <select name="role_id" required>{% for r in roles %}<option value="{{ r.role_id }}">{{ tenant_names[r.tenant_id] }} / {{ r.role_name }}</option>{% endfor %}</select></label>
+      <label>Permission
+        <select name="permission" required>{% for p in permissions %}<option value="{{ p.name }}">{{ p.name }}</option>{% endfor %}</select></label>
+      <button class="btn btn-primary" type="submit">Grant permission</button>
+    </form>
+    <p class="muted">To make one role inherit from another, use the <a href="{{ url_for('hierarchy') }}">role hierarchy</a> page.</p>
+  </article>
+</section>
+{% endblock %}

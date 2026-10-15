@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Permissions{% endblock %}
+{% block heading %}Permissions{% endblock %}
+{% block subtitle %}The permission catalog, written as resource:action.{% endblock %}
+{% block content %}
+<section class="grid-2 wide-left">
+  <article class="panel">
+    <h3>Permission catalog</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Permission</th><th>Resource</th><th>Action</th><th>Description</th></tr></thead>
+      <tbody>
+      {% for p in permissions %}
+        <tr><td>{{ p.permission_id }}</td><td><code class="perm">{{ p.name }}</code></td>
+            <td>{{ p.resource }}</td><td>{{ p.action }}</td><td>{{ p.description }}</td></tr>
+      {% else %}
+        <tr><td colspan="5" class="empty">No permissions yet.</td></tr>
+      {% endfor %}
+      </tbody></table></div>
+  </article>
+  <article class="panel">
+    <h3>Create permission</h3>
+    <form class="form" data-api="/api/permissions">
+      <label>Name (resource:action)<input name="name" placeholder="e.g. invoices:approve" pattern="[a-z_]+:[a-z_]+" required></label>
+      <label>Description<input name="description" placeholder="What does it allow?"></label>
+      <button class="btn btn-primary" type="submit">Create permission</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

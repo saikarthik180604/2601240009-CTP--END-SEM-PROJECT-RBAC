@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Role hierarchy{% endblock %}
+{% block heading %}Role hierarchy{% endblock %}
+{% block subtitle %}A directed graph. The role at the top inherits every permission of the roles below it.{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <h3>Hierarchy for tenant</h3>
+    <select id="tenant-select" aria-label="Tenant">
+      {% for t in tenants %}<option value="{{ t.tenant_id }}">{{ t.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div id="hierarchy-tree" class="tree" aria-live="polite"></div>
+  <p class="muted">Hover a role to see its own permissions. Arrows run from the senior role down to the role it inherits from.</p>
+</section>
+
+<section class="grid-2">
+  <article class="panel">
+    <h3>Inheritance links</h3>
+    <div id="edge-list" class="edge-list"></div>
+  </article>
+  <article class="panel">
+    <h3>Add inheritance</h3>
+    <p class="muted">The child role gains all permissions of the parent role. Links that create a cycle are rejected.</p>
+    <form class="form" data-api="/api/hierarchy">
+      <label>Child role (receives permissions)<select name="child_role_id" id="child-select" required></select></label>
+      <label>Parent role (gives permissions)<select name="parent_role_id" id="parent-select" required></select></label>
+      <button class="btn btn-primary" type="submit">Add inheritance</button>
+    </form>
+    <p class="muted">Try making Viewer the child of Admin to see circular inheritance rejected.</p>
+  </article>
+</section>
+{% endblock %}

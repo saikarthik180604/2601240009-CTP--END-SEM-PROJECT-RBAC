@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block subtitle %}Live totals and a permission checker.{% endblock %}
+{% block content %}
+<section class="cards">
+  <div class="card"><span class="card-value">{{ stats.tenants }}</span><span class="card-label">Total tenants</span></div>
+  <div class="card"><span class="card-value">{{ stats.users }}</span><span class="card-label">Total users</span></div>
+  <div class="card"><span class="card-value">{{ stats.roles }}</span><span class="card-label">Total roles</span></div>
+  <div class="card"><span class="card-value">{{ stats.permissions }}</span><span class="card-label">Total permissions</span></div>
+  <div class="card"><span class="card-value">{{ stats.checks }}</span><span class="card-label">Permission checks</span></div>
+  <div class="card good"><span class="card-value">{{ stats.allowed }}</span><span class="card-label">Allowed requests</span></div>
+  <div class="card bad"><span class="card-value">{{ stats.denied }}</span><span class="card-label">Denied requests</span></div>
+</section>
+
+<section class="grid-2">
+  <article class="panel">
+    <h3>Check a permission</h3>
+    <p class="muted">Calls <code>POST /api/check-permission</code> and writes an audit entry.</p>
+    <form class="form" data-api="/api/check-permission" data-render="check" data-result="check-result" data-no-reload>
+      <label>User
+        <select name="user_id" required>
+          {% for u in users %}<option value="{{ u.user_id }}">{{ u.username }}</option>{% endfor %}
+        </select></label>
+      <label>Tenant
+        <select name="tenant_id" required>
+          {% for t in tenants %}<option value="{{ t.tenant_id }}">{{ t.name }}</option>{% endfor %}
+        </select></label>
+      <label>Permission
+        <select name="permission" required>
+          {% for p in permissions %}<option value="{{ p.name }}">{{ p.name }}</option>{% endfor %}
+        </select></label>
+      <button class="btn btn-primary" type="submit">Check permission</button>
+    </form>
+    <div id="check-result" class="result-box" hidden></div>
+  </article>
+
+  <article class="panel">
+    <h3>Recent decisions</h3>
+    {% if recent %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>User</th><th>Tenant</th><th>Permission</th><th>Result</th></tr></thead>
+      <tbody>
+      {% for e in recent %}
+        <tr><td>{{ e.username }}</td><td>{{ e.tenant }}</td><td><code>{{ e.permission }}</code></td>
+            <td><span class="badge {{ 'allow' if e.result == 'ALLOW' else 'deny' }}">{{ e.result }}</span></td></tr>
+      {% endfor %}
+      </tbody></table></div>
+    <p><a href="{{ url_for('audit') }}">See the full audit log</a></p>
+    {% else %}
+    <p class="empty">No checks yet. Use the checker on the left or run <code>python demo.py --use-db</code>.</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

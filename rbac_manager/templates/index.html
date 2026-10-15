@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block heading %}Role-Based Access Control Manager{% endblock %}
+{% block subtitle %}Design and enforce a role and permission model for a multi-tenant application.{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <h2>Every request is checked. Every decision is logged.</h2>
+    <p>Roles inherit from other roles through a directed graph. Permissions are resolved with a greedy
+       algorithm, explicit denies always win, and tenants never see each other's data.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="{{ url_for('dashboard') }}">Open dashboard</a>
+      <a class="btn" href="{{ url_for('hierarchy') }}">View role hierarchy</a>
+    </div>
+  </div>
+  <div class="hero-flow" aria-label="Example role hierarchy">
+    <div class="flow-node">Admin</div><div class="flow-line"></div>
+    <div class="flow-node">Manager</div><div class="flow-line"></div>
+    <div class="flow-node">Editor</div><div class="flow-line"></div>
+    <div class="flow-node">Viewer</div>
+    <p class="flow-note">Each role inherits the permissions of the one below it.</p>
+  </div>
+</section>
+
+<section class="cards">
+  <div class="card"><span class="card-value">{{ stats.tenants }}</span><span class="card-label">Tenants</span></div>
+  <div class="card"><span class="card-value">{{ stats.users }}</span><span class="card-label">Users</span></div>
+  <div class="card"><span class="card-value">{{ stats.roles }}</span><span class="card-label">Roles</span></div>
+  <div class="card"><span class="card-value">{{ stats.permissions }}</span><span class="card-label">Permissions</span></div>
+</section>
+
+<section class="grid-3">
+  <article class="panel"><h3>Tenant isolation</h3>
+    <p>A user from ACME has no access to GLOBEX unless they are a member of GLOBEX, and even then only the roles owned by GLOBEX count.</p></article>
+  <article class="panel"><h3>Explicit deny</h3>
+    <p>A deny rule on a user beats any allow, including permissions inherited from a senior role.</p></article>
+  <article class="panel"><h3>Audit trail</h3>
+    <p>Each check stores who asked, in which tenant, for what, the result and the reason.</p></article>
+</section>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Tenants{% endblock %}
+{% block heading %}Tenants{% endblock %}
+{% block subtitle %}Each tenant owns its own roles. Roles never cross tenant boundaries.{% endblock %}
+{% block content %}
+<section class="grid-2 wide-left">
+  <article class="panel">
+    <h3>All tenants</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Name</th><th>Members</th><th>Roles</th></tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr><td>{{ row.tenant.tenant_id }}</td><td><strong>{{ row.tenant.name }}</strong></td>
+            <td>{{ row.users }}</td><td>{{ row.roles }}</td></tr>
+      {% else %}
+        <tr><td colspan="4" class="empty">No tenants yet. Create the first one.</td></tr>
+      {% endfor %}
+      </tbody></table></div>
+  </article>
+  <article class="panel">
+    <h3>Create tenant</h3>
+    <form class="form" data-api="/api/tenants">
+      <label>Tenant name<input name="name" placeholder="e.g. INITECH" required></label>
+      <button class="btn btn-primary" type="submit">Create tenant</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

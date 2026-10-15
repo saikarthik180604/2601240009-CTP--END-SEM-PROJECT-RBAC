@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block heading %}Users{% endblock %}
+{% block subtitle %}Create users, assign tenants and roles, and add explicit deny rules.{% endblock %}
+{% block content %}
+<section class="panel">
+  <h3>All users</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Home tenant</th><th>Member of</th><th>Roles</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td>{{ u.user_id }}</td>
+        <td><strong>{{ u.username }}</strong></td>
+        <td>{{ u.email }}</td>
+        <td>{{ tenant_names[u.tenant_id] }}</td>
+        <td>{% for tid in u.tenant_ids %}<span class="badge tenant">{{ tenant_names[tid] }}</span> {% endfor %}</td>
+        <td>
+          {% for rid in u.roles %}
+            {% set r = role_map[rid] %}
+            <span class="badge role">{{ tenant_names[r.tenant_id] }} / {{ r.role_name }}
+              <button class="chip-x" title="Remove role" data-post="/api/remove-role"
+                      data-payload='{{ {"user_id": u.user_id, "role_id": rid} | tojson }}'>&times;</button></span>
+          {% else %}<span class="muted">no roles</span>{% endfor %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="empty">No users yet. Create one below.</td></tr>
+    {% endfor %}
+    </tbody></table></div>
+</section>
+
+<section class="grid-2">
+  <article class="panel">
+    <h3>Create user</h3>
+    <form class="form" data-api="/api/users">
+      <label>Username<input name="username" required></label>
+      <label>Email<input name="email" type="email" required></label>
+      <label>Home tenant
+        <select name="tenant_id" required>{% for t in tenants %}<option value="{{ t.tenant_id }}">{{ t.name }}</option>{% endfor %}</select></label>
+      <button class="btn btn-primary" type="submit">Create user</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <h3>Assign a role</h3>
+    <form class="form" data-api="/api/assign-role">
+      <label>User
+        <select name="user_id" required>{% for u in users %}<option value="{{ u.user_id }}">{{ u.username }}</option>{% endfor %}</select></label>
+      <label>Role
+        <select name="role_id" required>{% for r in roles %}<option value="{{ r.role_id }}">{{ tenant_names[r.tenant_id] }} / {{ r.role_name }}</option>{% endfor %}</select></label>
+      <button class="btn btn-primary" type="submit">Assign role</button>
+    </form>
+    <hr>
+    <h3>Add user to another tenant</h3>
+    <form class="form" data-api="/api/user-tenants">
+      <label>User
+        <select name="user_id" required>{% for u in users %}<option value="{{ u.user_id }}">{{ u.username }}</option>{% endfor %}</select></label>
+      <label>Tenant
+        <select name="tenant_id" required>{% for t in tenants %}<option value="{{ t.tenant_id }}">{{ t.name }}</option>{% endfor %}</select></label>
+      <button class="btn" type="submit">Add to tenant</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <h3>Explicit deny rules</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>User</th><th>Tenant</th><th>Permission</th><th></th></tr></thead>
+      <tbody>
+      {% for d in denials %}
+        <tr><td>{{ d.username }}</td><td>{{ d.tenant }}</td><td><code>{{ d.permission }}</code></td>
+            <td><button class="btn btn-sm btn-danger" data-post="/api/denials/remove"
+                data-payload='{{ {"user_id": d.user_id, "tenant_id": d.tenant_id, "permission": d.permission} | tojson }}'>Remove</button></td></tr>
+      {% else %}
+        <tr><td colspan="4" class="empty">No deny rules. Add one below.</td></tr>
+      {% endfor %}
+      </tbody></table></div>
+    <form class="form" data-api="/api/denials">
+      <label>User
+        <select name="user_id" required>{% for u in users %}<option value="{{ u.user_id }}">{{ u.username }}</option>{% endfor %}</select></label>
+      <label>Tenant
+        <select name="tenant_id" required>{% for t in tenants %}<option value="{{ t.tenant_id }}">{{ t.name }}</option>{% endfor %}</select></label>
+      <label>Permission to deny
+        <select name="permission" required>{% for p in permissions %}<option value="{{ p.name }}">{{ p.name }}</option>{% endfor %}</select></label>
+      <button class="btn btn-danger" type="submit">Add deny rule</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <h3>Effective permissions</h3>
+    <p class="muted">What a user can actually do in one tenant after inheritance and deny rules.</p>
+    <form class="form" data-get="/api/effective-permissions" data-render="effective" data-result="effective-result">
+      <label>User
+        <select name="user_id" required>{% for u in users %}<option value="{{ u.user_id }}">{{ u.username }}</option>{% endfor %}</select></label>
+      <label>Tenant
+        <select name="tenant_id" required>{% for t in tenants %}<option value="{{ t.tenant_id }}">{{ t.name }}</option>{% endfor %}</select></label>
+      <button class="btn" type="submit">Show permissions</button>
+    </form>
+    <div id="effective-result" class="result-box" hidden></div>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}RBAC Manager{% endblock %} | RBAC Manager</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-mark">R</span>
+        <span class="brand-text">RBAC Manager<small>Multi-tenant access control</small></span>
+      </a>
+      <nav class="nav">
+        {% set pages = [
+          ('index', 'Home'), ('dashboard', 'Dashboard'), ('tenants', 'Tenants'),
+          ('users', 'Users'), ('roles', 'Roles'), ('permissions', 'Permissions'),
+          ('hierarchy', 'Role hierarchy'), ('audit', 'Audit logs')] %}
+        {% for endpoint, label in pages %}
+          <a href="{{ url_for(endpoint) }}" class="{{ 'active' if request.endpoint == endpoint else '' }}">{{ label }}</a>
+        {% endfor %}
+      </nav>
+      <div class="sidebar-foot">M.Tech academic project<br>Flask &middot; SQLite &middot; Python</div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <h1>{% block heading %}RBAC Manager{% endblock %}</h1>
+          <p class="subtitle">{% block subtitle %}{% endblock %}</p>
+        </div>
+      </header>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

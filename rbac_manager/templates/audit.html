@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Audit logs{% endblock %}
+{% block heading %}Audit logs{% endblock %}
+{% block subtitle %}Every permission check: who, where, what, the result and why.{% endblock %}
+{% block content %}
+<section class="cards">
+  <div class="card"><span class="card-value">{{ stats.total }}</span><span class="card-label">Total checks</span></div>
+  <div class="card good"><span class="card-value">{{ stats.allowed }}</span><span class="card-label">Allowed</span></div>
+  <div class="card bad"><span class="card-value">{{ stats.denied }}</span><span class="card-label">Denied</span></div>
+</section>
+<section class="panel">
+  <div class="panel-head">
+    <h3>Log entries (newest first)</h3>
+    <div class="filters" role="group" aria-label="Filter by result">
+      <button class="btn btn-sm active" data-filter="ALL">All</button>
+      <button class="btn btn-sm" data-filter="ALLOW">Allowed</button>
+      <button class="btn btn-sm" data-filter="DENY">Denied</button>
+    </div>
+  </div>
+  <div class="table-wrap"><table id="audit-table">
+    <thead><tr><th>Time</th><th>User</th><th>Tenant</th><th>Permission</th><th>Result</th><th>Reason</th></tr></thead>
+    <tbody>
+    {% for e in entries %}
+      <tr data-result="{{ e.result }}">
+        <td class="nowrap">{{ e.timestamp }}</td><td>{{ e.username }}</td><td>{{ e.tenant }}</td>
+        <td><code>{{ e.permission }}</code></td>
+        <td><span class="badge {{ 'allow' if e.result == 'ALLOW' else 'deny' }}">{{ e.result }}</span></td>
+        <td>{{ e.reason }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="empty">No audit entries yet. Run a permission check on the dashboard.</td></tr>
+    {% endfor %}
+    </tbody></table></div>
+</section>
+{% endblock %}
